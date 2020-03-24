@@ -1,0 +1,2 @@
+# mmu
+MongoDB management utility
