@@ -41,7 +41,7 @@ print_help() {
   echo -e "  -p   container MongoDB database destination port"
   echo -e "    --version   output version information and exit"
   echo -e "\nSome examples:"
-  echo -e "  ./dbbackup.sh -b -p 27017 "
+  echo -e "  ./dbbackup.sh -b -p 27017"
 }
 
 set_port() {
