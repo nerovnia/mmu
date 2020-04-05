@@ -4,15 +4,16 @@ MongoDB Management Utility
 
   ## Mandatory arguments to long options are mandatory for short options too.
 
-    -h   display this help and exit 
-    -b   backup an entire database
-    -r   restore an entire database
-    -v   list all backup files
-    -f   path to backup files in the backup directory
-    -с   configuration file
-    -p   container MongoDB database destination port
-    -n   docker container name
-      --version   output version information and exit
+    -p, --port        container MongoDB database destination port
+    -c, --container   docker container name
+    -b, --backup      backup an entire database
+    -r, --restore     restore an entire database
+    -l, --list        list all backup files
+    -d, --directory   path to backup files in the backup directory
+    -u, --use-cfg     use configuration file
+    -s, --set-cfg     path to configuration file
+    -v, --version     output version information and exit
+    -h, --help        display this help and exit 
   
   Some examples:
 

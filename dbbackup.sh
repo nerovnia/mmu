@@ -189,8 +189,12 @@ if [ -n "$1" ]; then
             shift
             set_backup_path $1
           ;;
-          -u | --use-config )
+          -u | --use-cfg )
             read_cfg
+          ;;
+          -s | --set-cfg )
+            shift
+            CFG=$1
           ;;
           -v | --version ) 
             echo "$SNAME"       
