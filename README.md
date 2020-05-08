@@ -9,7 +9,7 @@ MongoDB Management Utility
     -b, --backup      backup an entire database
     -r, --restore     restore an entire database
     -l, --list        list all backup files
-    -d, --directory   path to backup files in the backup directory
+    -d, --directory   set path to backup directory
     -u, --use-cfg     use configuration file
     -s, --set-cfg     path to configuration file
     -v, --version     output version information and exit
@@ -17,7 +17,7 @@ MongoDB Management Utility
   
   Some examples:
 
-    ./dbbackup.sh -b -c config.file
+    ./dbbackup.sh -b -s config.file
     ./dbbackup.sh -r -p 27017
     ./dbbackup.sh --version
 
@@ -27,3 +27,7 @@ MongoDB Management Utility
     DBPORT - MongoDB open port in container
     CONTAINER - conatainer name
     URI - connection string to database
+    DBLOGIN - login to database
+    DBPASSWORD - password  to database
+
+##     

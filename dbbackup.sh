@@ -16,7 +16,7 @@ VERSION="0.1.0"
 
 ## Directories and files
 BACKUP_NAME=$(date +\%Y.\%m.\%d.\%H\%M\%S)
-BACKUP_PATH=""
+BACKUP_PATH="./backup"
 ARCHIVE_NAME="$BACKUP_PATH/$BACKUP_NAME.archive"
 CFG="config.file"
 
@@ -42,20 +42,33 @@ COUNT_ERR=0
 re='^[0-9]+$'
 backup=1
 restore=1
+CFG_IS_READ=1
 
 shopt -s nullglob
 declare -a BACKUP_FILES=("${BACKUP_PATH}"/*)
 
 check_backup_path () {
-  if [ ! -d $BACKUP_PATH ]; then
+  if [ ! -d $BACKUP_PATH ] && [ ! $CFG_IS_READ ]; then
     print_err "Directory $BACKUP_PATH is absend!"
-    exit 1
+    read -p "Do you want create this directory: " YN
+    if [ "$YN" == "y" ] || [ "$YN" == "Y"]; then
+      mkdir -p $BACKUP_PATH
+    else
+      exit 1
+    fi;  
   fi;
 }
 
 read_cfg () {
+  echo "read_cfg"
+  CFG_IS_READ=0
   if [ -e $CFG ] && [ -f $CFG ]; then
     . $CFG
+    echo "$DBPASSWORD"
+    if [ "$DBPASSWORD" == "" ] || [ "$DBLOGIN" == "" ]; then
+      print_err "Login or password can't  be empty!"
+      exit 1
+    fi;
     check_backup_path
     set_port $DBPORT
     set_container $CONTAINER
@@ -87,14 +100,19 @@ print_help () {
   echo -e "\nMandatory arguments to long options are mandatory for short options too."
   echo -e "  -p, --port       container MongoDB database destination port"
   echo -e "  -c, --container  docker container name"
-  echo -e "  -b, --backup     backup database"
-  echo -e "  -r, --restore    restore database"
+  echo -e "  -b, --backup     backup an entire database"
+  echo -e "  -r, --restore    restore an entire database"
   echo -e "  -l, --list       list all backup files"
-  echo -e "  -d, --directory  set path to backup files directory"
+  echo -e "  -d, --directory  set path to backup directory"
+  echo -e "  -u, --use-cfg    use configuration file"
+  echo -e "  -s, --set-cfg    set path to configuration file"
   echo -e "  -v, --version    output version information and exit"
   echo -e "  -h, --help       display this help and exit" 
   echo -e "\nSome examples:"
   echo -e "  ./dbbackup.sh -b -p 27017"
+  echo -e "  ./dbbackup.sh -b -s config.file"
+  echo -e "  ./dbbackup.sh -r -p 27017"
+  echo -e "  ./dbbackup.sh --version"
 }
 
 print_err () {
@@ -134,7 +152,8 @@ dbbackup () {
   echo "DBPORT: $DBPORT"
   echo "BACKUP_PATH: $BACKUP_PATH"
   echo "URI: $URI"
-   docker exec nerv_mongo sh -c "exec mongodump --uri=\"$URI\" --gzip --archive"  > $ARCHIVE_NAME
+  set -x
+  docker exec $CONTAINER sh -c "exec mongodump --uri=\"$URI\" --gzip --archive"  > $ARCHIVE_NAME
    #docker exec "$CONTAINER" sh -c "exec mongodump --uri=\"$URI\" --gzip --archive" # > $ARCHIVE_NAME
    #docker exec "$CONTAINER" sh -c "exec mongodump --uri=\"$URI\" --gzip --archive" #> $ARCHIVE_NAME
    echo "--"
@@ -211,6 +230,10 @@ if [ -n "$1" ]; then
       esac
       shift
   done
+  if [ "$CONTAINER" == "" ]; then
+    print_err "Container can't be empty."
+    exit 1
+  fi;
 else
   print_err "Can't find any argument!"
   exit 1  
@@ -224,7 +247,9 @@ if [ $backup -eq $restore ]; then
     exit 1
   fi;  
 else
-  auth
+  if [ ! $CFG_IS_READ ] && ([ "$DBPASSWORD" == "" ] || [ "$DBLOGIN" == "" ]); then
+    auth
+  fi;
   if [ $backup -eq 0 ]; then
     dbbackup
   else
